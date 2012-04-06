@@ -7,6 +7,7 @@ typedef uint32_t	BigWord;	// 32-bit integers for long words... kind of a hack re
 #define MEM_SIZE	0x100000	// Thats 128Kb of RAM!
 #define REG_SIZE	0x08		// And 8 registers: A, B, C, X, Y, Z, I and J
 
+#define PAUSE	getchar()
 
 // Shorthand memory location definitions
 #define A		0x00
@@ -37,3 +38,16 @@ typedef uint32_t	BigWord;	// 32-bit integers for long words... kind of a hack re
 
 // Extended opcode definitions
 #define EOP_JSR	0x01
+
+
+// Define a structure for the CPU.
+struct CPU {
+	Word 	MEM[MEM_SIZE];	// Create memory, size 0x100000, 16 bit wide
+	Word 	REG[REG_SIZE];	// Create registers, size 0x08m, 16 bit wide
+	Word 	SP;				// Stack pointer, 16 bit wide
+	Word 	PC;				// Program counter, 16 bit wide
+	Word 	O;				// Overflow, 16 bit wide (!?)
+	bool	halt;			// Are we halted?
+	bool	skip;			// Are we supposed to skip an instruction?
+	uint8_t	state;			// Keeps track of sub-cycle state
+};

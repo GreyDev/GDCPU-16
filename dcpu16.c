@@ -4,51 +4,11 @@
 #include <math.h>
 #include <ctype.h>
 #include <assert.h>
+#include <string.h> /* memset */
 
 // Include our header file
 // It includes some definitions to try and keep the code pretty
 #include "dcpu16.h"
-
-// Define a structure for the CPU.
-struct CPU {
-	Word MEM[MEM_SIZE];		// Create memory, size 0x100000, 16 bit wide
-	Word REG[REG_SIZE];		// Create registers, size 0x08m, 16 bit wide
-	Word SP;				// Stack pointer, 16 bit wide
-	Word PC;				// Program counter, 16 bit wide
-	Word O;					// Overflow, 16 bit wide (!?)
-	bool halt;				// Are we halted?
-	bool skip;				// Are we supposed to skip an instruction?
-};
-
-// Show memory & register subroutines
-/*
-void showMem()
-{
-  int i;
-  int w = 0;
-  for( i=0; i<MEM_SIZE; i++ )
-    {
-      printf( "%0.2X:%0.4X ", i, MEM[ i ] );
-      if( w++ == 7 )
-        {
-          printf( "\n" );
-          w = 0;
-        }
-    }
-  printf( "\n" );
-}
-
-void showRegs()
-{
-  int i;
-  for( i=0; i<8; i++ )
-    printf( "%0.1X:%0.4X ", i, REG[ i ] );
-  printf( "\n" );
-  for( ; i<16; i++ )
-    printf( "%0.1X:%0.4X ", i, REG[ i ] );
-  printf( "\n" );
-}
-*/
 
 Word *lookup(struct CPU *Instance, Word Address) {
 
@@ -143,10 +103,12 @@ void cpu_step(struct CPU *Instance) {
 		// New format: aaaaaaoooooo0000
 		// So lets redefine our opcode
 		Opcode = (Instruction >> 4) & 0x3F;
+		ArgA = (Instruction >> 10) & 0x3F;
 		
 		switch (Opcode) {
 			case 0x01:
-				// DO stuff for JSR
+				Instance->MEM[ --Instance->SP ] = Instance->PC;
+				Instance->PC = *lookup( Instance, ArgA );
 				break;
 			default: // Undefined opcode? Lets just say its a halt instruction.
 				printf("Halt Detected\n");
@@ -252,20 +214,41 @@ void cpu_step(struct CPU *Instance) {
 }
 
 
+void cpu_init(struct CPU *Instance) {
+	// Initialise the stack pointer to 0xFFFF
+	Instance->SP = 0xFFFF;
+	// Everything else should be zeros
+	Instance->PC = 0x0000;
+	Instance->O  = 0x0000;
+	memset( Instance->MEM, 0, sizeof( Instance->MEM ) );
+	memset( Instance->REG, 0, sizeof( Instance->REG ) );
+
+	// We don't want to halt or skip an instruction
+	Instance->skip = false;
+	Instance->halt = false;
+	
+	// Ensure that the sub-cycle state is at zero
+	Instance->state = 0x0000;
+
+	// I don't think anything else needs to be initialised.
+}
+
 int main() {
 	
 	// Instantiate our CPU! Call it Instance.
 	// Because we are using a struct, we could actually have multiple CPUs...
 	// Multi core DCPU-16s? Challenge accepted... someday.
 	struct CPU Instance;
-	
-	Instance.halt = false;
-	printf("Initialized. Press any key to continue...");
 
-	getchar();
+	cpu_init( &Instance );
+	printf("Initialised. Press any key to continue...");
+	
+	PAUSE;
+	
+	
 	
 	while (Instance.halt == false) {
-		cpu_step(&Instance);
+		cpu_step( &Instance );
 	}
 
 }
