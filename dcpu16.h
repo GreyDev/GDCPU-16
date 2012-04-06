@@ -1,3 +1,11 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <math.h>
+#include <ctype.h>
+#include <assert.h>
+#include <string.h> /* memset */
+
 
 // C doesn't have boolean data types... lets improvise with our own
 typedef enum { false, true } bool;

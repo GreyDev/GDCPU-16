@@ -1,11 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <math.h>
-#include <ctype.h>
-#include <assert.h>
-#include <string.h> /* memset */
-
 // Include our header file
 // It includes some definitions to try and keep the code pretty
 #include "dcpu16.h"
@@ -242,10 +234,7 @@ int main() {
 
 	cpu_init( &Instance );
 	printf("Initialised. Press any key to continue...");
-	
 	PAUSE;
-	
-	
 	
 	while (Instance.halt == false) {
 		cpu_step( &Instance );
